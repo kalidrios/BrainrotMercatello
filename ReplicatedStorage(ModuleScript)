@@ -1,0 +1,27 @@
+local Data = {
+	["8 Pets Equipped"] = {ID = 1277570593}, 
+	["Teleport"] = {ID = 1239351332}, 
+	["Hoverboard"] = {ID = 1284338258}, 
+	["VIP"] = {ID = 1283302319}, 
+	["Triple Egg Open"] = {ID = 1284920270}, 
+	["Skip Egg Open"] = {ID = 1285584427, }, 
+	["Pet Storage"] = {ID = 1284890291}, 
+	["Super Pet Storage"] = {ID = 1284986454}, 
+	["Auto Hatch"] = {ID = 1283682462}, 
+	["Lucky"] = {ID = 1284182550}, 
+	["Mythical Hunter"] = {ID = 1285172461}, 
+	["Magic Eggs"] = {ID = 1283972484}, 
+	["Magnet"] = {ID = 1285292400},
+	["Secret Hunter"] = {ID = 127826519},
+	["Shiny Hunter"] = {ID = 1284470567},
+	["15 Pets Equipped"] = {ID = 140977665}, 
+	["Octuple Egg Open"] = {ID = 102179048}, 
+} 
+
+--[[local _string = ""
+for i,v in pairs(Data) do
+	_string = _string .. "[\""..string.gsub(string.lower(i)," ", "").."\"] = \""..i.."\", \n"
+end
+print(_string)]]--
+
+return Data
