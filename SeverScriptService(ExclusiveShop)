@@ -4,6 +4,7 @@ local salePet = "1022"
 --------|     Library     |--------
 local _L = require(game.ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Library"))
 while (not _L.Loaded) do  game:GetService("RunService").Heartbeat:Wait()  end
+local MarketplaceService = game:GetService("MarketplaceService")
 
 --------|    Reference    |--------
 
@@ -109,7 +110,7 @@ function buyExclusive(plr: instance, amount: number): boolean
 	
 	task.spawn(function()
 		task.delay(1.5, function()
-			_L.Network.Fire("Notification", plr, "(x"..amount..") Exclusive Egg added to inventory!", {
+			_L.Network.Fire("Notification", plr, "(x"..amount..") Exclusive Box added to inventory!", {
 				color = Color3.fromRGB(221, 85, 255), 
 				force = true
 			})
@@ -160,23 +161,21 @@ _L.Network.Invoked("Exclusive Shop Purchase").OnInvoke = function(plr: instance,
 	
 	--warn("------------------COST------------------")
 	if data.Cost > save["Paw Tokens"] then
-		return false, "You need ".._L.Functions.Commas(data.Cost-save["Paw Tokens"]).." more Paw Tokens!"
+		-- Sem Paw Tokens: abre prompt Robux e sai sem debitar nada
+		if data.class == "Gamepass" then
+			local dir = _L.Directory.Gamepasses[p]
+			if dir then
+				MarketplaceService:PromptGamePassPurchase(plr, dir.ID)
+			end
+		elseif data.class == "Product" then
+			local dir = _L.Directory.Products[p]
+			if dir then
+				MarketplaceService:PromptProductPurchase(plr, dir.ID)
+			end
+		end
+		return false, "You need ".._L.Functions.Commas(data.Cost-save["Paw Tokens"]).." more Velvet Tokens!"
 	end
 	--warn("------------------COST------------------")
-	
-	--warn("------------------REQUIRES------------------")
-	if data.Requires then
-		if not save.PurchasedPurchasables[data.Requires] then
-			return false, "You need "..data.Requires.." first!"
-		end
-	end
-	--warn("------------------REQUIRES------------------")
-
-	--warn("------------------OWNS------------------")
-	if save.PurchasedPurchasables[p] and not data.inf then
-		return false
-	end
-	--warn("------------------OWNS------------------")
 	
 	--warn("------------------MISC------------------")
 	save["Paw Tokens"] = save["Paw Tokens"] - data.Cost
@@ -213,8 +212,22 @@ end
 
 _L.Network.Invoked("Can Buy 100 Eggs").OnInvoke = function(player)
 	local save = _L.Saving.Get(player)
-	if save then 
+	if save then
 		return save.SpentPawTokens >= 100
 	end
 	return nil
 end
+-- concede passes comprados em Robux
+MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passId, purchased)
+	if not purchased then return end
+	for name, info in pairs(_L.Directory.Gamepasses) do
+		if info.ID == passId then
+			giveGamepass(player, name)
+			local save = _L.Saving.Get(player)
+			if save then
+				save.PurchasedPurchasables[name] = 1
+			end
+			break
+		end
+	end
+end)
