@@ -1,3 +1,5 @@
+-- https://github.com/kalidrios
+
 local _L = require(game.ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Library"))
 while (not _L.Loaded) do  game:GetService("RunService").Heartbeat:Wait()  end
 local t_ExclusiveShop = _L.GUI.ExclusiveShop
@@ -781,6 +783,23 @@ end
 function Purchase(purchasable: string)
 	local s, r = _L.Network.Invoke("Exclusive Shop Purchase", purchasable)
 	if not s then
+		-- veio mensagem "… Paw Tokens 😥"
+		if r and string.find(r, "Paw Tokens") then
+			_L.Message.New(r)
+			local data = _L.Shared.Purchasables[purchasable]
+			if data then
+				local id
+				if data.class == "Gamepass" then
+					id = _L.Directory.Gamepasses[purchasable].ID
+				elseif data.class == "Product" then
+					id = _L.Directory.Products[purchasable].ID
+				end
+				if id then
+					_L.Shared.PromptPurchase(id, true) -- abre o prompt Robux no cliente
+				end
+			end
+			return
+		end
 		_L.Message.New(r or "Something went wrong, try again!")
 		return
 	end
