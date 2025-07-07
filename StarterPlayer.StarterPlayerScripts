@@ -113,12 +113,15 @@ function UpdateGamepasses()
 		_L.GUIFX.ButtonFX(p15)
 		local gamepass = p15:GetAttribute("Gamepass")
 		local t_ID5 = _L.Directory.Gamepasses[gamepass].ID
-		p15.Activated:Connect(function() 
-			if not bool1 then
-				bool1 = true
-				Purchase(gamepass)
-				bool1 = false
+		p15.Activated:Connect(function()
+			if bool1 then return end
+			if _L.Gamepasses.Owns(_L.Directory.Gamepasses[gamepass].ID) then
+				_L.Message.New("You already own this Game Pass!")
+				return
 			end
+			bool1 = true
+			Purchase(gamepass)
+			bool1 = false
 		end)
 	end
 	for _, child6 in ipairs(t_ExclusiveShop.Gamepasses:GetChildren()) do
@@ -646,12 +649,17 @@ function UpdateInfinitePets()
 	end
 	UpdateRobuxPriceFrame(t_Price5, t_ID15, false)
 end
-function UpdatePriceFrame(button, p2)  
+function UpdatePriceFrame(button, p2)
+	if _L.Directory.Gamepasses[p2] and _L.Gamepasses.Owns(_L.Directory.Gamepasses[p2].ID) then
+		button.Robux.Text = "Owned"
+		button.RobuxIcon.Image = "rbxassetid://6516386809"
+		return
+	end
 	local v14 = _L.Shared.Purchasables[p2]
 	local Robux = button:FindFirstChild("Robux")
 	if v14 and v14.Cost then
 		Robux.Text = _L.Functions.Commas(v14.Cost)
-		return 
+		return
 	end
 	Robux.Text = "???"
 end
@@ -791,7 +799,7 @@ function Purchase(purchasable: string)
 				local id
 				if data.class == "Gamepass" then
 					id = _L.Directory.Gamepasses[purchasable].ID
-				elseif data.class == "Product" then
+				elseif data.class == "Product" or data.class == "Boost" or data.class == "ExclusiveEgg" then
 					id = _L.Directory.Products[purchasable].ID
 				end
 				if id then
