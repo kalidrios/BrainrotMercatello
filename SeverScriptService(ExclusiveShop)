@@ -157,23 +157,26 @@ _L.Network.Invoked("Exclusive Shop Purchase").OnInvoke = function(plr: instance,
 	if not data then
 		return nil
 	end
+	if data.class == "Gamepass" then
+		local gp = _L.Directory.Gamepasses[p]
+		if gp and _L.Gamepasses.Owns(plr, gp.ID) then
+			return false, "You already own this Game Pass!"
+		end
+	end
 	--warn("------------------SHARED------------------")
 	
 	--warn("------------------COST------------------")
 	if data.Cost > save["Paw Tokens"] then
 		-- Sem Paw Tokens: abre prompt Robux e sai sem debitar nada
+		local dir
 		if data.class == "Gamepass" then
-			local dir = _L.Directory.Gamepasses[p]
-			if dir then
-				MarketplaceService:PromptGamePassPurchase(plr, dir.ID)
-			end
-		elseif data.class == "Product" then
-			local dir = _L.Directory.Products[p]
-			if dir then
-				MarketplaceService:PromptProductPurchase(plr, dir.ID)
-			end
+			dir = _L.Directory.Gamepasses[p]
+			if dir then MarketplaceService:PromptGamePassPurchase(plr, dir.ID) end
+		elseif data.class == "Product" or data.class == "Boost" or data.class == "ExclusiveEgg" then
+			dir = _L.Directory.Products[p]
+			if dir then MarketplaceService:PromptProductPurchase(plr, dir.ID) end
 		end
-		return false, "You need ".._L.Functions.Commas(data.Cost-save["Paw Tokens"]).." more Velvet Tokens!"
+		return false, "You need " .. _L.Functions.Commas(data.Cost - save["Paw Tokens"]) .. " more Velvet Tokens!"
 	end
 	--warn("------------------COST------------------")
 	
